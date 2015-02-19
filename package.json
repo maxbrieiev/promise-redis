@@ -1,0 +1,15 @@
+{
+    "name": "promise-redis",
+    "version": "0.0.1",
+    "description": "",
+    "main": "index.js",
+    "keywords": [
+        "redis",
+        "promise",
+        "when"
+    ],
+    "author": "Maksym Brieiev",
+    "dependencies": {
+        "redis": "^0.12.1"
+    }
+}
