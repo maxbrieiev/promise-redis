@@ -16,7 +16,7 @@
         "then"
     ],
     "author": "Maksym Brieiev",
-    "licence": "MIT",
+    "license": "MIT",
     "dependencies": {
         "redis": "^0.12.1"
     }
