@@ -14,7 +14,8 @@ function createCb(resolve, reject) {
 }
 
 module.exports = function (promiseFactory) {
-    var mlproto = redis.Multi.prototype;
+    var mlproto = redis.Multi.prototype,
+        clproto = redis.RedisClient.prototype;
 
     function promisify(f) {
         return function () {
@@ -36,8 +37,7 @@ module.exports = function (promiseFactory) {
     }
 
     redisCmds.forEach(function (fullCommand) {
-        var cmd = fullCommand.split(' ')[0],
-            clproto = redis.RedisClient.prototype;
+        var cmd = fullCommand.split(' ')[0];
 
         if (cmd !== 'multi') {
             clproto[cmd] = promisify(clproto[cmd]);
@@ -47,7 +47,8 @@ module.exports = function (promiseFactory) {
     });
 
     // For Multi only `exec` command returns promise.
-    mlproto.exec = promisify(mlproto.exec);
+    mlproto.exec_transaction = promisify(mlproto.exec_transaction);
+    mlproto.exec = mlproto.exec_transaction;
     mlproto.EXEC = mlproto.exec;
 
     return redis;
