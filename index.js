@@ -17,6 +17,12 @@ module.exports = function (promiseFactory) {
     var mlproto = redis.Multi.prototype,
         clproto = redis.RedisClient.prototype;
 
+    if (!promiseFactory) {
+        promiseFactory = function (resolver) {
+            return new Promise(resolver);
+        };
+    }
+
     function promisify(f) {
         return function () {
             var args = Array.prototype.slice.call(arguments),
