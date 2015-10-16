@@ -3,12 +3,14 @@ promise-redis
 -------------
 
 `promise-redis` is a tiny library that adds promise awareness to `node_redis`_,
-the main node.js redis client.
+the main node.js redis client. You may provide any promise-library. But if you
+don't provide any, then `native JavaScript Promise`_ will be used instead.
 
 Features:
 
 * It is agnostic about what promise library you use. You will want to provide
-  promise library of your choice (no lock-in).
+  promise library of your choice (no lock-in) or just use native JavaScript
+  promises.
 
 * Nothing new to learn. `promise-redis` just lifts redis commands to return
   promises, and then exposes to you the original `node_redis`_ object. So for
@@ -33,27 +35,31 @@ The only dependency of `promise-redis` is `node_redis`_. To install
 Usage
 -----
 
-You show to `promise-redis` what promise library you would like to use, and it
-starts using that library to create promises for you:
+Using redis with native promises is easy:
 
 .. code-block:: javascript
 
-    var redis = require('promise-redis')(factory);
+    var redis = require('promise-redis')();
 
-where ``factory`` is a function you should provide, whose purpose is to create
-new promise. It is a glue between `promise-redis` and the promise library of
-your choice.
+Now you can use ``redis`` object as usual, but each command will return
+a promise:
 
-The sole argument to ``factory`` is ``resolver`` function. ``resolver`` should
-be called as ``resolver(resolve, reject)``.  ``resolve`` and ``reject`` are
-functions that control the state of the promise.
+.. code-block:: javascript
 
-``factory`` will be called by `promise-redis` to create a promise, when a
-command is sent to a redis server.
+    var client = redis.createClient();
+    client.set('mykey', 'myvalue')
+        .then(console.log)
+        .catch(console.log)
 
-This sounds too complicated, but in fact it is very easy to use, because most
-libraries already provide such an interface to create promises. So let's see
-how it integrates with existing promise libraries.
+If you want to use some promise library, you need to provide factory function:
+
+.. code-block:: javascript
+
+    var redis = require('promise-redis')(function(resolver) {
+        // do something here that provides a way to create new promise.
+    });
+
+See below for examples of integration with some well-known promise libraries.
 
 Q
 ===
@@ -75,6 +81,15 @@ Integration with `Q`_ is easy. Just use ``Q.Promise`` as a factory function.
     client.set('mykey', 'myvalue')
         .then(console.log)
         .catch(console.log)
+
+    // Callback style code is still supported. This can be useful if some of
+    // old code still relies on callbacks.
+    client.hmset('myotherkey', {'one': 1, 'two': 2}, function (err, value) {
+        if (err) {
+            return console.log("Error: ", err.message);
+        }
+        console.log(value);
+    });
 
 when
 ====
@@ -98,6 +113,15 @@ function:
         .then(console.log)
         .catch(console.log)
 
+    // Callback style code is still supported. This can be useful if some of
+    // old code still relies on callbacks.
+    client.hmset('myotherkey', {'one': 1, 'two': 2}, function (err, value) {
+        if (err) {
+            return console.log("Error: ", err.message);
+        }
+        console.log(value);
+    });
+
 Bluebird
 ========
 
@@ -120,6 +144,21 @@ Bluebird
     client.set('mykey', 'myvalue')
         .then(console.log)
         .catch(console.log)
+
+    // Callback style code is still supported. This can be useful if some of
+    // old code still relies on callbacks.
+    client.hmset('myotherkey', {'one': 1, 'two': 2}, function (err, value) {
+        if (err) {
+            return console.log("Error: ", err.message);
+        }
+        console.log(value);
+    });
+
+Other libraries
+===============
+
+Pull requests that demonstrate how other libraries can be integrated are
+welcome.
 
 
 Examples
@@ -198,3 +237,4 @@ promise.
 .. _Q: https://github.com/kriskowal/q/
 .. _when: https://github.com/cujojs/when
 .. _Bluebird: https://github.com/petkaantonov/bluebird
+.. _`native JavaScript Promise`: https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
