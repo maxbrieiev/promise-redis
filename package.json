@@ -1,6 +1,6 @@
 {
     "name": "promise-redis",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "Tiny library that adds promise awareness to node_redis",
     "main": "index.js",
     "repository": {
